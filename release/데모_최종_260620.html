@@ -910,14 +910,19 @@ function remIdx(p){ const [s,e]=curPeriod(p.cw); const a=[]; for(let i=s;i<=e;i+
 function wfKind(p,k,label){
   const c=k==='jt'?p.jc:p.wc;
   const weeks=remIdx(p).map(i=>{ const tot=p[k+'_wt'][i];
-    return `<div class="wk-in"><label>${i+1}주</label><input type="number" min="0" max="${tot}" value="${WFh[k][i]??0}" oninput="setWk('${k}',${i},this.value,${tot})"><span class="wk-tot">/${tot}h</span></div>`; }).join('');
+    return `<div class="wk-in"><label>${i+1}주</label><input type="number" min="0" max="${tot}" value="${WFh[k][i]??0}" oninput="setWk('${k}',${i},this,${tot})"><span class="wk-tot">/${tot}h</span></div>`; }).join('');
   return `<div class="wf-kind">
     <div class="wf-krow"><span>${label}</span><span class="wf-rem">지난 ${c.cAtt}/${c.cTot}h · 현재 출석률 ${pct(c.cur)}</span></div>
     <div id="wf-g-${k}"></div>
     <div class="wf-weeks">${weeks||'<span style="color:var(--mut2);font-size:11px">남은 주차 없음 (기간 종료)</span>'}</div>
   </div>`;
 }
-function setWk(k,i,v,max){ WFh[k][i]=Math.max(0,Math.min(max,Math.round(+v||0))); updateWF(); }
+function setWk(k,i,el,max){ // 배정시간(max) 초과·음수 입력은 입력칸 값까지 되돌려 막는다
+  let v=Math.round(+el.value||0);
+  if(v>max){ v=max; el.value=max; }
+  else if(v<0){ v=0; el.value=0; }
+  WFh[k][i]=v; updateWF();
+}
 function renderWF(){
   const p=CUR;
   document.getElementById('wf').innerHTML=`
