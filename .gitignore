@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+
+# Claude Code 세션/스킬 로컬 데이터
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+
+# 빌드 이전 작업본(소스는 src/ 로 이관됨)
+_demo_*.js
+_demo_*.html
+_demo_*.json
+260620_*

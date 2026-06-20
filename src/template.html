@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미래내일 일경험 운영관리 · 데모</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">미래내일 일경험 운영관리<small>참여자 출결·수당 점검 · 조치 지원</small></div>
+    <nav class="nav" id="nav">
+      <a data-v="dash" class="on"><span class="ic">▤</span> 오늘 할 일</a>
+      <a data-v="list"><span class="ic">≣</span> 참여자 관리</a>
+      <a data-v="logs"><span class="ic">◷</span> 처리 내역</a>
+      <a data-v="mentors"><span class="ic">⊞</span> 멘토별 현황</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="top">
+      <div>
+        <h1 id="vtitle">오늘의 처리</h1>
+        <div class="sub" id="vsub">로그인 직후 · 우선순위 큐</div>
+      </div>
+      <div class="top-r">
+        <span id="aiMode" class="ai-mode">⚪ mock</span>
+        <button class="filt-btn" onclick="checkBridge()" title="터미널에서 python3 bridge.py 실행 후 클릭">로컬 Claude 연결</button>
+        <input id="apiKey" type="password" placeholder="또는 Claude API 키 (sk-ant-…)" autocomplete="off"
+               oninput="APIKEY=this.value.trim();document.getElementById('aiMode').textContent=APIKEY?'🟢 실시간 AI · API':(BRIDGE_OK?'🟢 로컬 Claude':'⚪ mock');">
+      </div>
+    </div>
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="closeDetail()"></div>
+<div class="panel" id="panel"></div>
+<div class="modal" id="modal"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = /*__DATA__*/[];
+/*__APP__*/
+</script>
+</body>
+</html>
