@@ -1009,9 +1009,14 @@ function confirmAction(kind){
   const isCall=g.channel.includes('전화')||g.channel.includes('면담');
   if(kind==='hold'){ p.status='hold'; LOGS.unshift({t:nowStr(),id:p.id,nm:p.nm,type:'보류',ai:'',final:'',result:'hold',reason:'',summary:''}); toast('⏸ 보류 — 3일 후 재알림(스누즈)'); closeDetail(); go(CURVIEW); return; }
   p.status = kind==='paid' ? 'paid' : 'contacted';
-  p.contacts.push({d:DEMO_DAY, memo:label}); // 연락/처리 기록 (그날 날짜 자동)
-  LOGS.unshift({ t:nowStr(), id:p.id, nm:p.nm, type: isCall?'직접연락':(p.doc==='미비'?'서류안내':'출석독려'),
-    ai:g.msg, final:(document.getElementById('ai-msg')||{}).value||g.msg, result:kind, reason:'', summary:g.summary });
+  // 연락 완료: 오늘 이미 연락 기록(캘린더 추가 등)이 있으면 중복 로그를 만들지 않고 상태만 변경
+  const alreadyToday = kind==='contacted' && (p.contacts||[]).some(c=>c.d===DEMO_DAY);
+  if(!alreadyToday){
+    const cid=++CID; // 연락/처리 기록 ↔ 처리 내역 연결 (삭제 동기화)
+    p.contacts.push({d:DEMO_DAY, memo:label, cid});
+    LOGS.unshift({ t:nowStr(), id:p.id, nm:p.nm, type: isCall?'직접연락':(p.doc==='미비'?'서류안내':'출석독려'),
+      ai:g.msg, final:(document.getElementById('ai-msg')||{}).value||g.msg, result:kind, reason:'', summary:g.summary, cid });
+  }
   toast('✅ '+label+' · 기록됨');
   closeDetail(); go(CURVIEW);
 }
