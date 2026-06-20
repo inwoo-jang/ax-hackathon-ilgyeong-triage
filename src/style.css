@@ -155,16 +155,24 @@
   .cal-d.today{ outline:2px solid var(--acc); color:var(--acc); font-weight:800; }
   .cal-d.clk{ cursor:pointer; }
   .cal-d.clk:hover{ background:var(--ai-bg); color:var(--ai); font-weight:800; }
+  .cal-d.sel{ background:var(--acc); color:#fff; font-weight:800; }
+  .cal-d.sel.has{ background:var(--acc); color:#fff; }
   .clog{ }
   .clog-h{ font-size:11.5px; font-weight:700; color:var(--mut); margin-bottom:8px; }
   .clog-i{ font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--line2); display:flex; gap:8px; }
   .clog-i b{ color:var(--green); flex-shrink:0; font-variant-numeric:tabular-nums; }
-  .clog-i{ cursor:pointer; border-radius:4px; padding-left:4px; padding-right:4px; align-items:center; }
+  .clog-i{ border-radius:4px; padding-left:4px; padding-right:4px; align-items:center; }
   .clog-i:hover{ background:var(--panel2); }
+  .cmemo{ flex:1; }
+  .cacts{ display:flex; gap:2px; margin-left:auto; flex-shrink:0; }
+  .cbtn{ border:none; background:transparent; cursor:pointer; font-size:12.5px; color:var(--mut2); width:24px; height:24px; border-radius:4px; line-height:1; padding:0; }
+  .cbtn:hover{ background:#fff; color:var(--acc); box-shadow:0 0 0 1px var(--line); }
+  .cbtn.del:hover{ color:var(--red); }
+  .cbtn.save{ color:var(--green); font-weight:800; }
   .cedit-in{ flex:1; border:1px solid var(--acc); border-radius:3px; padding:4px 7px; font-size:12.5px; }
   .cedit-in:focus{ outline:none; }
-  .clog-i.edit .btn{ padding:4px 10px; font-size:11px; }
   .cadd{ display:flex; gap:6px; margin-top:10px; align-items:center; }
+  .cadd-d{ font-size:11.5px; font-weight:800; color:var(--acc); white-space:nowrap; padding:0 4px; }
   .cadd select{ border:1px solid var(--line); border-radius:var(--r); padding:7px 9px; font-size:12px; background:#fff; color:var(--txt); }
   .cadd input{ flex:1; border:1px solid var(--line); border-radius:var(--r); padding:7px 10px; font-size:12.5px; }
   .cadd input:focus,.cadd select:focus{ outline:none; border-color:var(--acc); }

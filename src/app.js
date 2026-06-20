@@ -185,11 +185,11 @@ function genAI(p, prompt){
 }
 
 // ===== 상태 =====
-let CURVIEW='dash', CUR=null, LOGS=[], WFh={jt:{},we:{}}, WFmax=false, EDITMODE=false, CEDIT=-1, BATCH=new Set(), SHOWCONTACT=false, QSORT='swing', QDIR=1, QDOC=false, QPAY=false, APIKEY='', BRIDGE_OK=false;
+let CURVIEW='dash', CUR=null, LOGS=[], WFh={jt:{},we:{}}, WFmax=false, EDITMODE=false, CEDIT=-1, SELDATE=DEMO_DAY, CID=0, BATCH=new Set(), SHOWCONTACT=false, QSORT='swing', QDIR=1, QDOC=false, QPAY=false, APIKEY='', BRIDGE_OK=false;
 function toggleQDoc(){ QDOC=!QDOC; renderDash(); }
 function toggleQPay(){ QPAY=!QPAY; renderDash(); }
 function setQSort(s){ if(QSORT===s) QDIR=-QDIR; else { QSORT=s; QDIR=1; } renderDash(); }
-function arrow(){ return QDIR>0?'↑':'↓'; }
+function arrow(){ const desc = QSORT==='swing' ? (QDIR>0) : (QDIR<0); return desc?'↑':'↓'; } // ↑=높은값순, ↓=낮은값순
 function setMax(on){ // 체크: 남은 주 전부 배정시간 만땅 / 해제: 현재 출석률 유지 기본값
   WFmax=on; const p=CUR;
   const jr=on?1:(p.jc.cur??fullRate(p,'jt',0,3)), wr=on?1:(p.wc.cur??fullRate(p,'we',0,3));
@@ -357,7 +357,7 @@ function updateBatch(){ const n=BATCH.size; document.getElementById('bcount').te
 
 // ===== 상세 패널 =====
 function openDetail(id, edit){
-  EDITMODE = !!edit; CEDIT=-1;
+  EDITMODE = !!edit; CEDIT=-1; SELDATE=DEMO_DAY;
   const p=DATA.find(x=>x.id===id); CUR=p; WFh={jt:{},we:{}}; WFmax=false;
   // 기본값=현재율 유지. 현재 기간 데이터가 없으면(기간 시작 시점) 직전 P1 출석률을 습관 기준으로 사용
   const jr=p.jc.cur ?? fullRate(p,'jt',0,3), wr=p.wc.cur ?? fullRate(p,'we',0,3);
@@ -398,8 +398,9 @@ function openDetail(id, edit){
        <div class="block-h">연락 기록</div>
        <div id="ccalWrap">${contactCal(p)}</div>
        <div class="cadd">
+         <span id="selDateLbl" class="cadd-d">선택: 6/${DEMO_DAY}</span>
          <input id="cMemo" placeholder="연락 메모 입력 (예: 출석 독려 안내, 서류 요청)">
-         <button class="btn pri" onclick="addContact()">+ 오늘 기록 추가</button>
+         <button class="btn pri" onclick="addContact()">+ 기록 추가</button>
        </div>
      </div>
      <div class="block">
@@ -495,20 +496,20 @@ function contactCal(p){
   const marked=new Set((p.contacts||[]).map(c=>c.d));
   let cells='';
   for(let i=0;i<first;i++) cells+='<div class="cal-d emp"></div>';
-  for(let d=1;d<=days;d++) cells+=`<div class="cal-d clk ${marked.has(d)?'has':''} ${d===DEMO_DAY?'today':''}" onclick="addContactOn(${d})" title="${d}일에 연락 기록 추가">${d}</div>`;
+  for(let d=1;d<=days;d++) cells+=`<div class="cal-d clk ${marked.has(d)?'has':''} ${d===SELDATE?'sel':''} ${d===DEMO_DAY?'today':''}" onclick="selectCalDate(${d})" title="${d}일 선택">${d}</div>`;
   const items=(p.contacts||[]).map((c,i)=>({...c,i})).sort((a,b)=>a.d-b.d);
   const log=items.length
     ? items.map(c=> c.i===CEDIT
-        ? `<div class="clog-i edit"><b>6/${c.d}</b> <input id="cedit-input" class="cedit-in" value="${(c.memo||'').replace(/"/g,'&quot;')}"><button class="btn pri" onclick="saveContact()">저장</button><button class="btn" onclick="delContact()">삭제</button></div>`
-        : `<div class="clog-i" onclick="editContact(${c.i})" title="클릭하여 수정"><b>6/${c.d}</b> <span>${c.memo}</span></div>`
+        ? `<div class="clog-i edit"><b>6/${c.d}</b> <input id="cedit-input" class="cedit-in" value="${(c.memo||'').replace(/"/g,'&quot;')}"><span class="cacts"><button class="cbtn save" onclick="saveContact()" title="저장">✓</button><button class="cbtn" onclick="cancelContact()" title="취소">✕</button></span></div>`
+        : `<div class="clog-i"><b>6/${c.d}</b> <span class="cmemo">${c.memo}</span><span class="cacts"><button class="cbtn" onclick="editContact(${c.i})" title="수정">✎</button><button class="cbtn del" onclick="delContactAt(${c.i})" title="삭제">✕</button></span></div>`
       ).join('')
     : '<div style="color:var(--mut2);font-size:12px;padding:8px 0">아직 연락 기록이 없습니다.</div>';
   return `<div class="ccal">
     <div class="cal">
-      <div class="cal-top">2026. 6 <span style="font-weight:500;color:var(--mut2);font-size:10px">· 날짜 클릭 = 그날 기록 추가</span></div>
+      <div class="cal-top">2026. 6 <span style="font-weight:500;color:var(--mut2);font-size:10px">· 날짜 선택 후 '기록 추가'</span></div>
       <div class="cal-grid">${['일','월','화','수','목','금','토'].map(w=>`<div class="cal-w">${w}</div>`).join('')}${cells}</div>
     </div>
-    <div class="clog"><div class="clog-h">연락한 날짜 · 메모 <span style="font-weight:500;color:var(--mut2)">(클릭하여 수정)</span></div>${log}</div>
+    <div class="clog"><div class="clog-h">연락한 날짜 · 메모 <span style="font-weight:500;color:var(--mut2)">(✎ 수정 · ✕ 삭제)</span></div>${log}</div>
   </div>`;
 }
 function spark(p){
@@ -654,21 +655,33 @@ function saveWeekly(){
   toast('💾 서버 전송 완료 · 출석 시간 수정·재계산됨 (mock)');
   openDetail(p.id, false);
 }
+function selectCalDate(d){ // 날짜는 '선택'만, 추가는 '기록 추가' 버튼으로
+  if(!CUR) return;
+  SELDATE=d;
+  document.getElementById('ccalWrap').innerHTML=contactCal(CUR);
+  const lbl=document.getElementById('selDateLbl'); if(lbl) lbl.textContent='선택: 6/'+d;
+}
 function addContactOn(d){
   if(!CUR) return;
   const inp=document.getElementById('cMemo');
   const memo=(inp&&inp.value.trim())||'연락';
-  CUR.contacts.push({d, memo}); // 지정 날짜로 기록 (오늘 또는 캘린더에서 고른 날짜)
+  const cid=++CID; // 연락 기록 ↔ 처리 내역(LOGS) 연결 키
+  CUR.contacts.push({d, memo, cid});
   if(CUR.status==='untouched') CUR.status='contacted';
-  LOGS.unshift({ t:(d===DEMO_DAY?nowStr():'6/'+d), id:CUR.id, nm:CUR.nm, type:'연락', ai:'(직접 기록)', final:memo, result:'contacted', reason:'', summary:'운영자 수동 연락 기록' });
+  LOGS.unshift({ t:(d===DEMO_DAY?nowStr():'6/'+d), id:CUR.id, nm:CUR.nm, type:'연락', ai:'(직접 기록)', final:memo, result:'contacted', reason:'', summary:'운영자 수동 연락 기록', cid });
   if(inp) inp.value='';
   CEDIT=-1; document.getElementById('ccalWrap').innerHTML=contactCal(CUR);
   toast('6/'+d+' 연락 기록 추가됨 · 처리 내역 반영');
 }
-function addContact(){ addContactOn(DEMO_DAY); } // '오늘 기록 추가' 버튼
+function addContact(){ addContactOn(SELDATE); } // 선택한 날짜로 추가
 function editContact(i){ if(!CUR) return; CEDIT=i; document.getElementById('ccalWrap').innerHTML=contactCal(CUR); const inp=document.getElementById('cedit-input'); if(inp) inp.focus(); }
-function saveContact(){ if(!CUR) return; const inp=document.getElementById('cedit-input'); if(inp&&CEDIT>=0&&CUR.contacts[CEDIT]) CUR.contacts[CEDIT].memo=inp.value.trim()||CUR.contacts[CEDIT].memo; CEDIT=-1; document.getElementById('ccalWrap').innerHTML=contactCal(CUR); toast('메모 수정됨'); }
-function delContact(){ if(!CUR) return; if(CEDIT>=0) CUR.contacts.splice(CEDIT,1); CEDIT=-1; document.getElementById('ccalWrap').innerHTML=contactCal(CUR); toast('기록 삭제됨'); }
+function cancelContact(){ CEDIT=-1; if(CUR) document.getElementById('ccalWrap').innerHTML=contactCal(CUR); }
+function saveContact(){ if(!CUR) return; const inp=document.getElementById('cedit-input'); const c=CUR.contacts[CEDIT];
+  if(inp&&CEDIT>=0&&c){ c.memo=inp.value.trim()||c.memo; if(c.cid){ const l=LOGS.find(x=>x.cid===c.cid); if(l) l.final=c.memo; } } // 처리 내역 메모도 동기화
+  CEDIT=-1; document.getElementById('ccalWrap').innerHTML=contactCal(CUR); toast('메모 수정됨'); }
+function delContactAt(i){ if(!CUR) return; const c=CUR.contacts[i];
+  if(c){ if(c.cid) LOGS=LOGS.filter(l=>l.cid!==c.cid); CUR.contacts.splice(i,1); } // 처리 내역에서도 삭제
+  CEDIT=-1; document.getElementById('ccalWrap').innerHTML=contactCal(CUR); toast('기록 삭제됨 · 처리 내역 반영'); }
 function closeDetail(){ document.getElementById('ov').classList.remove('show'); document.getElementById('panel').classList.remove('show'); CUR=null; }
 
 // ===== 일괄 처리 =====
