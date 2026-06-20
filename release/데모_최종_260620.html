@@ -1101,12 +1101,12 @@ function renderLogs(){
   const v=document.getElementById('view');
   if(!LOGS.length){ v.innerHTML=`<div class="empty">아직 확정된 조치가 없습니다.<br>대시보드 큐 또는 리스트에서 조치를 확정하면 여기에 기록됩니다.</div>`; return; }
   v.innerHTML=`<div class="sec-h"><h2>처리 내역 · ${LOGS.length}건</h2><div class="hint">연락·정산확정 처리 이력</div></div>
-   <table><thead><tr><th>시각</th><th>참여자</th><th>조치</th><th>결과</th></tr></thead><tbody>
+   <table><thead><tr><th>시각</th><th>참여자</th><th>내용</th><th>결과</th></tr></thead><tbody>
    ${LOGS.map(l=>`<tr style="cursor:pointer" onclick="openDetail(${l.id})"><td style="color:var(--mut2)">${l.t}</td><td><b>${l.nm}</b></td><td>${l.type}</td>
-     <td>${({paid:'<span class="pos">확정완료</span>',contacted:'<span style="color:#2b5fd0">연락완료</span>',hold:'<span style="color:var(--amber)">보류</span>'})[l.result]||l.result}</td></tr>`).join('')}
+     <td>${({paid:'<span class="pos">정산내용 확정</span>',contacted:'<span style="color:#2b5fd0">직접 연락</span>',hold:'<span style="color:var(--amber)">보류</span>'})[l.result]||l.result}</td></tr>`).join('')}
    </tbody></table>
    <div style="margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px;font-size:12.5px;color:var(--mut)">
-     처리 요약 — 확정완료 ${LOGS.filter(l=>l.result==='paid').length} · 연락완료 ${LOGS.filter(l=>l.result==='contacted').length} · 보류 ${LOGS.filter(l=>l.result==='hold').length}
+     처리 요약 — 정산내용 확정 ${LOGS.filter(l=>l.result==='paid').length} · 직접 연락 ${LOGS.filter(l=>l.result==='contacted').length} · 보류 ${LOGS.filter(l=>l.result==='hold').length}
    </div>`;
 }
 
